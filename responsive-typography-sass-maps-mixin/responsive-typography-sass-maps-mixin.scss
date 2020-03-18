@@ -1,0 +1,127 @@
+// This is responsive typography system based on Sass maps
+
+
+// Default font-size for a website
+$base-font-size: 16px;
+//
+// Place here values in px for breakpoints, headings and text
+// Example:
+$breakpoints: (
+  'small' : 480px,
+  'normal': 720px,
+  'wide'  : 960px,
+  'large' : 1280px
+);
+
+$p-font-sizes: (
+  null  : (18px, 1.3),
+  small : (19px, 1.5),
+  normal: (20px, 1.4),
+  wide  : 21px,
+  large : 21px
+);
+
+$h1-font-sizes: (
+  null  : (34px, 1.2),
+  small : 37px,
+  normal: (43px, 1.1),
+  wide  : 49px,
+  large : 55px
+);
+
+//$h2-font-sizes: (
+//
+//);
+
+//$h3-font-sizes: (
+//
+//);
+
+//$h4-font-sizes: (
+//
+//);
+
+//$h5-font-sizes: (
+//
+//);
+
+//$h6-font-sizes: (
+//
+//);
+
+//==============================================================
+//MIXINS & FUNCTIONS
+//==============================================================
+// Strip units from a value
+// ----------------------------
+@function strip-units($value) {
+  @return $value / ($value * 0 + 1);
+}
+
+// Calculate rems from a px value
+// ------------------------------
+@function rem-calc($px, $base-font-value: $base-font-size) {
+  @if not unitless($px) {
+    $px: strip-units($px);
+  }
+  @if not unitless($base-font-value) {
+    $base-font-value: strip-units($base-font-value);
+  }
+  @return ($px / $base-font-value) * 1rem;
+}
+
+// Calculate ems from a px value
+// ------------------------------
+@function em-calc($px, $base-font-value: $base-font-size) {
+  @if not unitless($px) {
+    $px: strip-units($px);
+  }
+  @if not unitless($base-font-value) {
+    $base-font-value: strip-units($base-font-value);
+  }
+  @return ($px / $base-font-value) * 1em;
+}
+
+// Calculates proper line-height given a
+// font-size to maintain vertical rhythm.
+// ------------------------------
+@function calculate-line-height($font-size) {
+  $line-height-size: ceil($font-size / $base-line-height) * ($base-line-height / $font-size);
+
+  @return $line-height-size;
+}
+
+//===========================================================
+
+@mixin font-size($font-size-map, $font-size-breakpoints: $breakpoints) {
+  @each $font-size-breakpoint, $final-font-size in $font-size-map {
+    @if $font-size-breakpoint == null {
+      @include make-font-size($final-font-size);
+    }
+    @else {
+      // Use the value if $final-font-size is a key that exists in
+      // $font-size-breakpoints
+      @if map-has-key($font-size-breakpoints, $font-size-breakpoint) {
+        $font-size-breakpoint: map-get($font-size-breakpoints, $font-size-breakpoint);
+      }
+      @media screen and (min-width: em-calc($font-size-breakpoint)) {
+        @include make-font-size($final-font-size);
+      }
+    }
+  }
+}
+
+@mixin make-font-size($final-font-size) {
+  // Include both font-size and line-height if $final-font-size is a list
+  @if type-of($final-font-size) == "list" {
+    font-size: nth($final-font-size, 1);
+    font-size: rem-calc(nth($final-font-size, 1));
+    @if (length($final-font-size) > 1) {
+      line-height: nth($final-font-size, 2);
+    }
+  }
+  @else {
+    font-size: $final-font-size;
+    font-size: rem-calc($final-font-size);
+  }
+}
